@@ -5,7 +5,6 @@ assert(sapling, "Cannot find sapling, have you called, loadPackages?")
 sapling.addModule(script)
 
 local LifelikeCharactersServiceClient = require(script.LifelikeCharactersServiceClient)
-local LifelikeCharactersServiceServer = require(script.LifelikeCharactersServiceServer)
 
 --[=[
 	@class LifelikeCharactersService
@@ -18,14 +17,15 @@ local LifelikeCharactersServiceServer = require(script.LifelikeCharactersService
 ]=]
 local LifelikeCharactersService = {}
 
+--[=[
+	@return LifelikeCharactersServiceClient
+	@client
+	
+	Returns the client API. This can only be called on the client.
+]=]
 function LifelikeCharactersService.getClient()
 	assert(RunService:IsClient(), "This can only be called on the client")
 	return LifelikeCharactersServiceClient
-end
-
-function LifelikeCharactersService.getServer()
-	assert(RunService:IsServer(), "This can only be called on the server")
-	return LifelikeCharactersServiceServer
 end
 
 --[=[

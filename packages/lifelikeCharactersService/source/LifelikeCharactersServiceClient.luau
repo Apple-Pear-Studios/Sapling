@@ -124,22 +124,25 @@ end
 --[=[
     @class LifelikeCharactersServiceClient
     @client
+
+    Can be accessed via [LifelikeCharactersService.getClient].
 ]=]
 local LifelikeCharactersServiceClient = {}
 
 --[=[
+    @param material Material
+
     Sets the sound for the passed `material` to be `sound` where if `sound` is nil then the fallback sound is used, this by default is
     the normal roblox walking sound however this can be overrided with [LifelikeCharactersServiceClient.changeFallbackSound].
 ]=]
-function LifelikeCharactersServiceClient.updateMaterialForSound(material: Enum.Material, sound: string?)
+function LifelikeCharactersServiceClient.updateSoundForMaterial(material: Enum.Material, sound: string?)
 	config.materialSounds[material] = sound
 end
 
 --[=[
-    Sets the sound for the passed `material` to be `sound` where if `sound` is nil then the fallback sound is used, this by default is
-    the normal roblox walking sound however this can be overrided with [LifelikeCharactersServiceClient.changeFallbackSound].
+    Change the default footstep sound that is used when a [Material] doesnt have a sound set.
 ]=]
-function LifelikeCharactersServiceClient.changeFallbackSound(sound: string?)
+function LifelikeCharactersServiceClient.changeFallbackSound(sound: string)
 	config.fallbackSound = sound
 end
 
@@ -147,7 +150,7 @@ end
     @private
     This function is called for you when the package starts. You do NOT need to call this.
     
-    If you call this function it already
+    If you call this function it will error.
 ]=]
 function LifelikeCharactersServiceClient.setup()
 	assert(not isSetup, "Setup has already been called")
