@@ -10,7 +10,7 @@ local CollectionService = game:GetService("CollectionService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
-local player = assert(Players.LocalPlayer)
+local player = Players.LocalPlayer
 local FirstPerson = require(script.FirstPerson)
 local getRemote = require(script.Parent.Parent.modules.getRemote)
 local XZ_VECTOR3 = Vector3.new(1, 0, 1)
