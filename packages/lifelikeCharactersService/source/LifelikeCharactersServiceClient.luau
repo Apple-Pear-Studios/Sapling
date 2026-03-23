@@ -53,7 +53,7 @@ function LifelikeCharactersServiceClient.setup()
 		if character == nil then
 			return
 		end
-		HeadSystem.UpdateLookAngles(character, yAngle, xAngle)
+		HeadSystem.updateLookAngles(character, yAngle, xAngle)
 	end)
 
 	RunService.Heartbeat:Connect(function()
@@ -68,7 +68,7 @@ function LifelikeCharactersServiceClient.setup()
 		local cameraDireaction = humanoidRootPart.CFrame:ToObjectSpace(camera.CFrame).LookVector
 		local yAngle = -math.asin(cameraDireaction.X)
 		local xAngle = math.asin(cameraDireaction.Y)
-		HeadSystem.UpdateLookAngles(character, yAngle, xAngle)
+		HeadSystem.updateLookAngles(character, yAngle, xAngle)
 		updateLookAnglesRemote:FireServer(yAngle, xAngle)
 	end)
 end
