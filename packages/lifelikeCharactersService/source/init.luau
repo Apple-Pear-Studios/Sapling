@@ -5,6 +5,7 @@ assert(sapling, "Cannot find sapling, have you called, loadPackages?")
 sapling.addModule(script)
 
 local LifelikeCharactersServiceClient = require(script.LifelikeCharactersServiceClient)
+local LifelikeCharactersServiceServer = require(script.LifelikeCharactersServiceServer)
 
 --[=[
 	@class LifelikeCharactersService
@@ -27,6 +28,17 @@ function LifelikeCharactersService.getClient()
 end
 
 --[=[
+	@return LifelikeCharactersServiceServer
+	@server
+	
+	Returns the server API. This can only be called on the server.
+]=]
+function LifelikeCharactersService.getServer()
+	assert(RunService:IsServer(), "This can only be called on the server")
+	return LifelikeCharactersServiceServer
+end
+
+--[=[
 	@tag Lifecycle
 	Lifecycle function called by sapling to setup the package.
 ]=]
@@ -34,6 +46,7 @@ function LifelikeCharactersService.saplingPackageStart()
 	if RunService:IsClient() then
 		LifelikeCharactersServiceClient.setup()
 	else
+		LifelikeCharactersServiceServer.setup()
 	end
 end
 

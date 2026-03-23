@@ -1,7 +1,14 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
 local FirstPersonBody = require(script.Parent.modules.FirstPersonBody)
 local FootstepSystem = require(script.Parent.modules.FootstepSystem)
+local HeadSystem = require(script.Parent.modules.HeadSystem)
+local getRemote = require(script.Parent.modules.getRemote)
 
 local isSetup = false
+local player = Players.LocalPlayer
 
 --[=[
     @class LifelikeCharactersServiceClient
@@ -39,6 +46,30 @@ function LifelikeCharactersServiceClient.setup()
 	isSetup = true
 	FootstepSystem.setupFootsteps()
 	FirstPersonBody.setup()
+
+	local updateLookAnglesRemote = getRemote("UpdateLookAngles")
+	updateLookAnglesRemote.OnClientEvent:Connect(function(character: Model, yAngle: number, xAngle: number)
+		if character == nil then
+			return
+		end
+		HeadSystem.UpdateLookAngles(character, yAngle, xAngle)
+	end)
+
+	RunService.Heartbeat:Connect(function()
+		local character = player.Character
+		if character == nil then
+			return
+		end
+
+		local camera = Workspace.CurrentCamera
+		local humanoidRootPart = character:FindFirstChild("HumanoidRootPart") :: Part
+
+		local cameraDireaction = humanoidRootPart.CFrame:ToObjectSpace(camera.CFrame).LookVector
+		local yAngle = -math.asin(cameraDireaction.X)
+		local xAngle = math.asin(cameraDireaction.Y)
+		HeadSystem.UpdateLookAngles(character, yAngle, xAngle)
+		updateLookAnglesRemote:FireServer(yAngle, xAngle)
+	end)
 end
 
 return LifelikeCharactersServiceClient
