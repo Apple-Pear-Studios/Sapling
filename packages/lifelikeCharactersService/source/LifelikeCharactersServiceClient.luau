@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
+local FirstPersonBody = require(script.Parent.modules.FirstPersonBody)
 
 local isSetup = false
 local CAN_DO_FOOTSTEPS = SoundService.CharacterSoundsUseNewApi == Enum.RolloutState.Enabled
@@ -156,6 +157,7 @@ function LifelikeCharactersServiceClient.setup()
 	assert(not isSetup, "Setup has already been called")
 	isSetup = true
 	setupFootsteps()
+	FirstPersonBody.setup()
 end
 
 return LifelikeCharactersServiceClient
