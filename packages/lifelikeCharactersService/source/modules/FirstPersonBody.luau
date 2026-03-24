@@ -1,16 +1,18 @@
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local cameraOffset = 0
 
 local FirstPersonBody = {}
 
-function FirstPersonBody.makeCharacterVisible()
-	local character = player.Character
-	if character == nil then
+function FirstPersonBody.setOffset(offset: number)
+	cameraOffset = offset
+end
+
+function FirstPersonBody.makeCharacterVisible(character: Model)
+	local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+	if humanoid == nil then
 		return
 	end
 
-	local humanoid = character:WaitForChild("Humanoid")
-	humanoid.CameraOffset = Vector3.new(0, 0, -1)
+	humanoid.CameraOffset = Vector3.new(0, 0, cameraOffset)
 
 	local characterParts = {
 		"LowerTorso",
@@ -27,12 +29,16 @@ function FirstPersonBody.makeCharacterVisible()
 		"RightHand",
 		"LeftUpperLeg",
 		"RightLowerLeg",
+		"Left Arm",
+		"Right Arm",
+		"Left Leg",
+		"Right Leg",
+		"Torso",
 	}
 
 	for _, limb in character:GetChildren() do
 		if limb:IsA("BasePart") then
 			if table.find(characterParts, limb.Name) then
-				limb.Transparency = 0
 				limb.LocalTransparencyModifier = 0
 			end
 		end

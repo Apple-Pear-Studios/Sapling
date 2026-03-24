@@ -78,7 +78,21 @@ function LifelikeCharactersServiceClient.setup()
 	isSetup = true
 	FootstepSystem.setupFootsteps()
 
-	RunService:BindToRenderStep("FirstPerson", Enum.RenderPriority.Camera.Value, FirstPersonBody.makeCharacterVisible)
+	RunService:BindToRenderStep("FirstPerson", Enum.RenderPriority.Camera.Value + 1, function()
+		local character = player.Character
+		if character == nil then
+			return
+		end
+
+		FirstPersonBody.makeCharacterVisible(character)
+
+		local distance = (character.Head.Position :: Vector3 - Workspace.CurrentCamera.CFrame.Position).Magnitude
+		if distance <= 1.6 then
+			FirstPersonBody.setOffset(-1.5)
+		else
+			FirstPersonBody.setOffset(0)
+		end
+	end)
 
 	Network.UpdateLookAnglesRemote.OnClientEvent:Connect(function(character: Model, buf: buffer)
 		if character == nil then

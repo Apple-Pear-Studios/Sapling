@@ -78,8 +78,10 @@ function HeadSystem.updateLookAngles(character: Model, yAngle: number, xAngle: n
 		end
 	end
 
-	local yOffset = neckMotor.C0.Y
+	local head = character:FindFirstChild("Head")
+	head.CanCollide = true
 
+	local yOffset = neckMotor.C0.Y
 	neckMotor.C0 = CFrame.new(0, yOffset, 0) * CFrame.Angles(0, yAngle, 0) * CFrame.Angles(xAngle, 0, 0)
 end
 
