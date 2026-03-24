@@ -14,6 +14,8 @@ example:
 
 ## Unreleased
 
+## v1.1.0
+
 ### Additions
 - New package `LifelikeCharactersService`.
 
