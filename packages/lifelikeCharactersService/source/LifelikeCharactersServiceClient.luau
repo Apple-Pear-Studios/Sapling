@@ -9,6 +9,7 @@ local Network = require(script.Parent.modules.Network)
 
 local isSetup = false
 local player = Players.LocalPlayer
+local firstPersonOffset = -1.5
 
 local headReplication = {
 	rate = 1 / 30,
@@ -34,6 +35,14 @@ local LifelikeCharactersServiceClient = {}
 ]=]
 function LifelikeCharactersServiceClient.setHeadRotationReplicationRate(rate: number)
 	headReplication.rate = rate
+end
+
+--[=[
+	Sets how far farward the camera will be in first person compared to normal. Note that
+	the negative scale is farward relative to the head.
+]=]
+function LifelikeCharactersServiceClient.setFirstPersonOffset(offset: number)
+	firstPersonOffset = offset
 end
 
 --[=[
@@ -88,7 +97,7 @@ function LifelikeCharactersServiceClient.setup()
 
 		local distance = (character.Head.Position :: Vector3 - Workspace.CurrentCamera.CFrame.Position).Magnitude
 		if distance <= 1.6 then
-			FirstPersonBody.setOffset(-1.5)
+			FirstPersonBody.setOffset(firstPersonOffset)
 		else
 			FirstPersonBody.setOffset(0)
 		end
