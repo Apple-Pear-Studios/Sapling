@@ -14,15 +14,52 @@ QueryBuilder.__index = QueryBuilder
 export type QueryBuilder = typeof(setmetatable(
 	{} :: {
 		_Query: string,
+		_Not: boolean,
 	},
 	QueryBuilder
 ))
+
+--[=[
+    @prop _Query string
+    @private
+    @readonly
+    @within QueryBuilder
+
+    The current query string. Do NOT access this directly, instead use [QueryBuilder.query]
+]=]
+
+--[=[
+    @prop _Not boolean
+    @private
+    @readonly
+    @within QueryBuilder
+
+    Controls if the next query is negated. [QueryBuilder.negate]
+]=]
 
 --[=[]=]
 function QueryBuilder.new()
 	local self = setmetatable({}, QueryBuilder) :: QueryBuilder
 	self._Query = ""
+	self._Not = false
 	return self
+end
+
+--[=[
+    @private
+    @method _AppendToQuery
+    @param append string
+    @within QueryBuilder
+    
+    Internal function to directly append to the qurey string. Also appends any needed characters
+    like a closing brace if a §not§ operation was used.
+]=]
+function QueryBuilder._AppendToQuery(self: QueryBuilder, append: string)
+	self._Query ..= append
+	if self._Not then
+		self._Not = false
+		self:_AppendToQuery(")")
+	end
 end
 
 --[=[
@@ -35,14 +72,14 @@ end
     Adds the `tag` to the search query.
 ]=]
 function QueryBuilder.withTag(self: QueryBuilder, tag: string)
-	self._Query ..= `.{tag}`
+	self:_AppendToQuery(`.{tag}`)
 	return self
 end
 
 --[=[
     @tag returns-self
 
-    @method withTag
+    @method either
     @param tag string
     @return QueryBuilder
     @within QueryBuilder
@@ -53,7 +90,51 @@ end
     ```
 ]=]
 function QueryBuilder.either(self: QueryBuilder)
-	self._Query ..= ", "
+	self:_AppendToQuery(", ")
+	return self
+end
+
+--[=[
+    @tag returns-self
+
+    @method child
+    @return QueryBuilder
+    @within QueryBuilder
+    Anything after this method is called will act on children of queried instances
+    that match the previous cases.
+]=]
+function QueryBuilder.child(self: QueryBuilder)
+	self:_AppendToQuery(" > ")
+	return self
+end
+
+--[=[
+    @tag returns-self
+
+    @method descendant
+    @return QueryBuilder
+    @within QueryBuilder
+    Same as [QueryBuilder.child] but for descendant.
+]=]
+function QueryBuilder.descendant(self: QueryBuilder)
+	self:_AppendToQuery(" >> ")
+	return self
+end
+
+--[=[
+    @tag returns-self
+
+    @method negate
+    @return QueryBuilder
+    @within QueryBuilder
+    Negates the next function that is aclled. For example:
+    ```lua
+    :negate():withTag("cool") -- Does NOT have the tag "cool"
+    ```
+]=]
+function QueryBuilder.negate(self: QueryBuilder)
+	self:_AppendToQuery(":not(")
+	self._Not = true
 	return self
 end
 
@@ -67,7 +148,7 @@ end
     Anything which has the `attributeName` set to anything but nil
 ]=]
 function QueryBuilder.hasAttribute(self: QueryBuilder, attributeName: string)
-	self._Query ..= `[${attributeName}]`
+	self:_AppendToQuery(`[${attributeName}]`)
 	return self
 end
 
@@ -82,7 +163,7 @@ end
     Anything which has the `attributeName` set to `attributeValue`. See more info about how `attributeValue` works: [QueryBuilder.wherePropertyIs]
 ]=]
 function QueryBuilder.whereAttributeIs(self: QueryBuilder, attributeName: string, attributeValue: string | any)
-	self._Query ..= `[${attributeName} = {attributeValue}]`
+	self:_AppendToQuery(`[${attributeName} = {attributeValue}]`)
 	return self
 end
 
@@ -96,7 +177,7 @@ end
     Anything which is a of class `class` (`:IsA()`)
 ]=]
 function QueryBuilder.whichIsA(self: QueryBuilder, class: string)
-	self._Query ..= class
+	self:_AppendToQuery(class)
 	return self
 end
 
@@ -110,7 +191,7 @@ end
     Anything which has the name `name`.
 ]=]
 function QueryBuilder.named(self: QueryBuilder, name: string)
-	self._Query ..= `#{name}`
+	self:_AppendToQuery(`#{name}`)
 	return self
 end
 
@@ -132,7 +213,7 @@ end
     :::
 ]=]
 function QueryBuilder.wherePropertyIs(self: QueryBuilder, property: string, value: string | any)
-	self._Query ..= `[{property} = {value}]`
+	self:_AppendToQuery(`[{property} = {value}]`)
 	return self
 end
 
