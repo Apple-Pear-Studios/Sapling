@@ -42,6 +42,24 @@ end
 --[=[
     @tag returns-self
 
+    @method withTag
+    @param tag string
+    @return QueryBuilder
+    @within QueryBuilder
+    An `or` operation between whats on the left to the right. For example:
+    ```lua
+    :withTag("Apple"):either():withTag("Orange"):hasAttribute("IsPeeled")
+    -- Has the tag "Apple" OR Has the tag "Orange" with an attribute of "IsPeeled"
+    ```
+]=]
+function QueryBuilder.either(self: QueryBuilder)
+	self._Query ..= ", "
+	return self
+end
+
+--[=[
+    @tag returns-self
+
     @method hasAttribute
     @param attributeName string
     @return QueryBuilder
