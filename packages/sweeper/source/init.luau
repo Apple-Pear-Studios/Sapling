@@ -46,6 +46,13 @@ function Sweeper.new()
 end
 
 --[=[
+	Check if `obj` is a sweeper.
+]=]
+function Sweeper.Is(obj: Sweeper?)
+	return typeof(obj) == "table" and obj.ClassName == "Sweeper"
+end
+
+--[=[
 	Adds a task to the sweeper to be cleaned up.
 ]=]
 function Sweeper.Add(self: Sweeper, task: Sweepable)
