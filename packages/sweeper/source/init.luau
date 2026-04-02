@@ -11,6 +11,16 @@ local DESTROY_METHODS = {
 
 --[=[
 	@class Sweeper
+	Garbage colection package, similar to `Maid` and `Janitor`.
+
+	Basic Usage:
+	```lua
+	local mySweeper = Sweeper.new()
+	local connection = RunService.Heartbeat:Connect(print) -- Print delta time
+	mySweeper:Add(connection)
+	task.wait(1)
+	mySweeper:Clean() -- Disconnects
+	```
 ]=]
 local Sweeper = {}
 Sweeper.ClassName = "Sweeper"
