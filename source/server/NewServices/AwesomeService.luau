@@ -7,11 +7,11 @@ AwesomeService.ServiceName = "AwesomeService"
 export type AwesomeService = typeof(AwesomeService)
 
 function AwesomeService.Init(self: AwesomeService, serviceLoader: serviceLoader.ServiceLoader)
-    serviceLoader:GetService(self, OtherService)
+	serviceLoader:GetService(self, OtherService)
 end
 
 function AwesomeService.Start(self: AwesomeService)
-    print("Start awesome service")
+	print("Start awesome service")
 end
 
 return AwesomeService

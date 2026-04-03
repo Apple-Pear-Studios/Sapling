@@ -13,8 +13,8 @@ ServiceLoader.__index = ServiceLoader
 export type ServiceLoader =
 	typeof(setmetatable(
 		{} :: {
-	_CanAddServices: boolean,
-	_Services: {[string]: serviceLoaderTypes.Service }
+			_CanAddServices: boolean,
+			_Services: { [string]: serviceLoaderTypes.Service },
 		},
 		{} :: typeof({ __index = ServiceLoader })
 	))
@@ -30,7 +30,11 @@ end
 --[=[
 
 ]=]
-function ServiceLoader.GetService(self: ServiceLoader, requiree: serviceLoaderTypes.Service, service: serviceLoaderTypes.Service)
+function ServiceLoader.GetService(
+	self: ServiceLoader,
+	requiree: serviceLoaderTypes.Service,
+	service: serviceLoaderTypes.Service
+)
 	local deps = requiree[ServiceLoaderUtils.ServiceDependenciesKey] or {}
 	table.insert(deps, service)
 
@@ -54,7 +58,12 @@ function ServiceLoader.Init(self: ServiceLoader)
 	end
 end
 
-function ServiceLoader._CallMethodDepp(self: ServiceLoader, methodName: string, service: serviceLoaderTypes.Service, ...)
+function ServiceLoader._CallMethodDepp(
+	self: ServiceLoader,
+	methodName: string,
+	service: serviceLoaderTypes.Service,
+	...
+)
 	local deps = service[ServiceLoaderUtils.ServiceDependenciesKey] or {}
 	for _, v in deps do
 		self:_CallMethodDepp(methodName, v)
@@ -68,7 +77,5 @@ end
 function ServiceLoader.Start(self: ServiceLoader)
 	self:_CallMethodDepp("Start", self._Services["Origin"])
 end
-
-
 
 return ServiceLoader

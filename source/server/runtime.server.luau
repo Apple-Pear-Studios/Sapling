@@ -16,7 +16,7 @@ local serviceLoader = require(script.Parent.Parent.Parent.ReplicatedStorage.pack
 -- print(queryBuilder.new():withTag("CoolTag"):query())
 
 local loader = serviceLoader.new()
-loader:GetService({ServiceName = "Origin"}, AwesomeService)
+loader:GetService({ ServiceName = "Origin" }, AwesomeService)
 print(loader._Services)
 loader:Init()
 loader:Start()
