@@ -1,4 +1,4 @@
-local Sweeper = require(script.Parent.roblox_packages.Sweeper)
+local Sweeper = require(script.Parent.roblox_packages.sweeper)
 
 --[=[
     @class BaseObject

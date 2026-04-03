@@ -21,6 +21,7 @@ local havePackagesBeenStarted = false
 
 --[=[
 	@class Sapling
+	@deprecated v2.0.0 -- use the `serviceLoader` package instead. This package is currently being kept around but will not get any updates. 
 	The main / core package of the Sapling framework.
 ]=]
 local Sapling = {}
