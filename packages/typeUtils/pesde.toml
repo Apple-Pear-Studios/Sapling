@@ -1,4 +1,4 @@
-name = "sapling/instance_utils"
+name = "sapling/types_utils"
 version = "0.1.0"
 license = "MIT"
 
@@ -16,9 +16,6 @@ sourcemap_generator = ".pesde/scripts/sourcemap_generator.luau"
 
 [dev_dependencies]
 scripts = { name = "pesde/scripts_rojo", version = "^0.2.0", target = "lune" }
-
-[dependencies]
-TypeUtils = { workspace = "sapling/types_utils", version = "=" }
 
 [engines]
 pesde = "^0.7.0"

@@ -11,6 +11,9 @@ roblox = "packages/baseObject"
 [workspace."sapling/binder"]
 roblox = "packages/binder"
 
+[workspace."sapling/instance_utils"]
+roblox = "packages/instanceUtils"
+
 [workspace."sapling/lifelike_characters_service"]
 roblox = "packages/lifelikeCharactersService"
 
@@ -25,6 +28,9 @@ roblox = "packages/sapling"
 
 [workspace."sapling/sweeper"]
 roblox = "packages/sweeper"
+
+[workspace."sapling/types_utils"]
+roblox = "packages/typeUtils"
 
 [graph."0x5eal/unzip@0.2.0 luau".pkg_ref]
 ref_ty = "pesde"

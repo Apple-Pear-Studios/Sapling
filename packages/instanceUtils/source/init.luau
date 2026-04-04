@@ -1,3 +1,4 @@
+local TypeUtils = require(script.Parent.roblox_packages.TypeUtils)
 local function WaitForChildWithPredicate(parent: Instance, predicate: (instance: Instance) -> boolean)
 	for _, v in parent:GetChildren() do
 		if predicate(v) then
@@ -28,7 +29,11 @@ function InstanceUtils.WaitForChildWhichIsA(instance: Instance, class: string)
 	end)
 end
 
-function InstanceUtils.WaitForChildWithAttributeSetTo<T>(instance: Instance, attribute: string, value: T)
+function InstanceUtils.WaitForChildWithAttributeSetTo(
+	instance: Instance,
+	attribute: string,
+	value: TypeUtils.PossibleAttributeValue
+)
 	return WaitForChildWithPredicate(instance, function(v: Instance)
 		return v:GetAttribute(attribute) == value
 	end)

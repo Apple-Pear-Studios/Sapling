@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BlockingDispatcher = require(script.Parent.BlockingDispatcher)
 local binder = require(script.Parent.Parent.Parent.ReplicatedStorage.packages.binder.binder)
-local instanceUtils = require(script.Parent.Parent.Parent.ReplicatedStorage.packages.instanceUtils)
+local instanceUtils = require(script.Parent.Parent.Parent.ReplicatedStorage.packages.instanceUtils.instanceUtils)
 local queryBuilder = require(script.Parent.Parent.Parent.ReplicatedStorage.packages.queryBuilder)
 local sapling = require(script.Parent.Parent.Parent.ReplicatedStorage.packages.sapling)
 
