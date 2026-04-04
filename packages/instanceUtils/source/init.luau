@@ -28,4 +28,10 @@ function InstanceUtils.WaitForChildWhichIsA(instance: Instance, class: string)
 	end)
 end
 
+function InstanceUtils.WaitForChildWithAttributeSetTo<T>(instance: Instance, attribute: string, value: T)
+	return WaitForChildWithPredicate(instance, function(v: Instance)
+		return v:GetAttribute(attribute) == value
+	end)
+end
+
 return InstanceUtils
