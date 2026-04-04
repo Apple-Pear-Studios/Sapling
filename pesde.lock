@@ -11,6 +11,9 @@ roblox = "packages/baseObject"
 [workspace."sapling/binder"]
 roblox = "packages/binder"
 
+[workspace."sapling/cli"]
+lune = "tools/CLI"
+
 [workspace."sapling/instance_utils"]
 roblox = "packages/instanceUtils"
 
