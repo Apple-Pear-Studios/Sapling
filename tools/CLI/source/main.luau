@@ -200,6 +200,12 @@ end
 CLI.new()
 	:setName("SaplingCLI")
 	:addAuthor("Sebastian2852 <gramps@itsabitrandom.com>")
+	:setGitRepository("https://github.com/Its-a-bit-random/Sapling/tools/CLI")
+	:setBugReportUrl("https://github.com/Its-a-bit-random/Sapling/issues")
+	:setDescription("A small utility CLI tool to help with adding Sapling packages to your project")
+	:setCopyright("Copyright (c) 2026 Its-a-bit-random")
+	:setLicense("MIT")
+	:setHomepage("https://sapling.itsabitrandom.com")
 	:addOption(
 		option
 			.new()
@@ -303,4 +309,7 @@ CLI.new()
 			Stdio.write(Stdio.color("reset"))
 		end)
 		:build())
+	:configure({
+		ansiColorEnabled = true,
+	})
 	:run(Process.args)
