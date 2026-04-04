@@ -151,9 +151,51 @@ function Binder.new<T>(tag: string | BinderConfig, class: ClassInterface<T>): Bi
 		for _, v in self._ClassInstances do
 			v:Destroy()
 		end
+		table.clear(self._ClassInstances)
 	end)
 
 	return self
+end
+
+--[=[
+	@private
+	Check if `instance` has a class creted for it.
+]=]
+function Binder._HasInstanceGotAClass<T>(self: Binder<T>, instance: Instance): boolean
+	return self._ClassInstances[instance] ~= nil
+end
+
+--[=[
+	@private
+	Create a class for the `instance`, as well as checking if it fits the [BinderConfig] and it doesn
+	not yet have a class.
+]=]
+function Binder._Add<T>(self: Binder<T>, instance: Instance)
+	local hasClass = self:_HasInstanceGotAClass(instance)
+	local canAdd = self._Predicate(instance)
+
+	if hasClass or not canAdd then
+		return
+	end
+
+	local class = self._Class.new(instance)
+	self._ClassInstances[instance] = class
+end
+
+--[=[
+	@private
+	Destroys the `instance`'s class if it has one.
+]=]
+function Binder._Remove<T>(self: Binder<T>, instance: Instance)
+	local hasClass = self:_HasInstanceGotAClass(instance)
+
+	if not hasClass then
+		return
+	end
+
+	local class = self._ClassInstances[instance]
+	class:Destroy()
+	self._ClassInstances[instance] = nil
 end
 
 --[=[
@@ -165,25 +207,11 @@ function Binder.Start<T>(self: Binder<T>)
 	end
 
 	self._Sweeper:Add(CollectionService:GetInstanceAddedSignal(self._Tag):Connect(function(instance: Instance)
-		if self._ClassInstances[instance] ~= nil then
-			warn("Already has class binded")
-			return
-		end
-		if not self._Predicate(instance) then
-			return
-		end
-
-		self._ClassInstances[instance] = self._Class.new(instance)
+		self:_Add(instance)
 	end))
 
 	self._Sweeper:Add(CollectionService:GetInstanceRemovedSignal(self._Tag):Connect(function(instance: Instance)
-		local class = self._ClassInstances[instance]
-		if class == nil then
-			return
-		end
-
-		self._Class.Destroy(class)
-		self._ClassInstances[instance] = nil
+		self:_Remove(instance)
 	end))
 end
 
