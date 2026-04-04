@@ -127,6 +127,76 @@ local function doesPackageExist(name: string, rev: string)
 	end
 end
 
+local function getLatestCommitFromTag()
+	local releaseResponse = Net.request({
+		method = "GET",
+		url = "https://api.github.com/repos/its-a-bit-random/sapling/releases/latest",
+	})
+
+	if not releaseResponse.ok then
+		printError(`Failed query for latest release: ({releaseResponse.statusCode}) {releaseResponse.statusMessage}`)
+		return false, nil, nil
+	end
+
+	local releaseData = Serde.decode("json", releaseResponse.body) :: {
+		tag_name: string,
+	}
+
+	local tagName = releaseData.tag_name
+
+	local tagRefResponse = Net.request({
+		method = "GET",
+		url = `https://api.github.com/repos/its-a-bit-random/sapling/git/ref/tags/{tagName}`,
+	})
+
+	if not tagRefResponse.ok then
+		printError(`Failed query for tag ref "{tagName}": ({tagRefResponse.statusCode}) {tagRefResponse.statusMessage}`)
+		return false, nil, nil
+	end
+
+	local tagRefData = Serde.decode("json", tagRefResponse.body) :: {
+		object: {
+			type: string,
+			sha: string,
+		},
+	}
+
+	if tagRefData.object.type == "commit" then
+		-- Lightweight tag: points directly to commit
+		return true, tagName, tagRefData.object.sha
+	elseif tagRefData.object.type == "tag" then
+		-- Annotated tag: points to tag object, need one more request
+		local annotatedTagResponse = Net.request({
+			method = "GET",
+			url = `https://api.github.com/repos/its-a-bit-random/sapling/git/tags/{tagRefData.object.sha}`,
+		})
+
+		if not annotatedTagResponse.ok then
+			printError(
+				`Failed query for annotated tag "{tagName}": ({annotatedTagResponse.statusCode}) {annotatedTagResponse.statusMessage}`
+			)
+			return false, nil, nil
+		end
+
+		local annotatedTagData = Serde.decode("json", annotatedTagResponse.body) :: {
+			object: {
+				type: string,
+				sha: string,
+			},
+		}
+
+		if annotatedTagData.object.type ~= "commit" then
+			printError(`Tag "{tagName}" does not resolve to a commit (got "{annotatedTagData.object.type}")`)
+			return false, nil, nil
+		end
+
+		return true, tagName, annotatedTagData.object.sha
+	else
+		printError(`Unknown tag ref object type "{tagRefData.object.type}" for tag "{tagName}"`)
+		return false, nil, nil
+	end
+end
+
 CLI.new()
 	:setName("SaplingCLI")
 	:addAuthor("Sebastian2852 <gramps@itsabitrandom.com>")
@@ -178,6 +248,17 @@ CLI.new()
 				Process.exit(1)
 			end
 
+			if rev == nil then
+				Stdio.write("No sapling packages installed; using latest tag: ")
+				local didGet, tag, commit = getLatestCommitFromTag()
+				if not didGet then
+					print("")
+					Process.exit(1)
+				end
+				print(tag)
+				rev = commit
+			end
+
 			if not doesPackageExist(packageName, rev) then
 				printError(`No package with then name "{packageName}" exists on rev "{rev}"`)
 				Process.exit(1)
@@ -192,6 +273,11 @@ CLI.new()
 			pesdeManieftData.dependencies = deps
 			local newData = Serde.encode("toml", pesdeManieftData)
 			Fs.writeFile(pesdePath, newData)
+
+			print(`Installed package: {packageName}`)
+			Stdio.write(Stdio.color("yellow"))
+			print("Your manifest file may not look how it did before, this is a limitation of Lune.")
+			Stdio.write(Stdio.color("reset"))
 		end)
 		:build())
 	:run(Process.args)
