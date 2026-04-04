@@ -19,17 +19,20 @@ type ClassInterface<T> = {
 	@interface BinderConfig
 	.Tags { string }
 	.Ancestors { Instance }
+	.Classes { string }
 	@within Binder
 
 	```lua
 	local config = {
 		Tags = { "Blue", "Red" }, -- Has tag "Blue" AND "Red"
+		Classes = { "BasePart", "Model" }, -- Is a BasePart OR Model
 		Ancestors = { Workspace, ReplicatedStorage } -- In Workspace OR ReplicatedStorage
 	}
 	```
 ]=]
 type BinderConfig = {
 	Tags: { string },
+	Classes: { string },
 	Ancestors: { Instance },
 }
 
@@ -105,6 +108,7 @@ function Binder.new<T>(tag: string | BinderConfig, class: ClassInterface<T>): Bi
 		tag = {
 			Tags = { tag },
 			Ancestors = { game },
+			Classes = {},
 		}
 	end
 	local config = tag :: BinderConfig
@@ -129,7 +133,18 @@ function Binder.new<T>(tag: string | BinderConfig, class: ClassInterface<T>): Bi
 				end
 			end
 		end
-		return true
+
+		if #config.Classes == 0 then
+			return true
+		end
+
+		for _, class in config.Classes do
+			if instance:IsA(class) then
+				return true
+			end
+		end
+
+		return false
 	end
 
 	self._Sweeper:Add(function()
