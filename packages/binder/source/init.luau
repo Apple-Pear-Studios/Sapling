@@ -4,8 +4,8 @@ local BaseObject = require(script.Parent.roblox_packages.BaseObject)
 
 --[=[
 	@interface ClassInterface<T>
-	.new: (instance: Instance) -> T
-	.Destroy: (T) -> ()
+	.new (instance: Instance) -> T
+	.Destroy (T) -> ()
 	@within Binder
 
 	Basic requiremnts for a class to be able to be used by a Binder
@@ -13,6 +13,24 @@ local BaseObject = require(script.Parent.roblox_packages.BaseObject)
 type ClassInterface<T> = {
 	new: (instance: Instance) -> T,
 	Destroy: (T) -> (),
+}
+
+--[=[
+	@interface BinderConfig
+	.Tags { string }
+	.Ancestors { Instance }
+	@within Binder
+
+	```lua
+	local config = {
+		Tags = { "Blue", "Red" }, -- Has tag "Blue" AND "Red"
+		Ancestors = { Workspace, ReplicatedStorage } -- In Workspace OR ReplicatedStorage
+	}
+	```
+]=]
+type BinderConfig = {
+	Tags: { string },
+	Ancestors: { Instance },
 }
 
 --[=[
@@ -48,6 +66,7 @@ export type Binder<T> =
 			_Class: ClassInterface<T>,
 			_Tag: string,
 			_ClassInstances: { [Instance]: ClassInterface<T> },
+			_Predicate: (instance: Instance) -> boolean,
 		},
 		Binder
 	))
@@ -78,13 +97,40 @@ export type Binder<T> =
 ]=]
 
 --[=[
-	Create a new binder
+	Create a new binder You can either pass a single tag string, or you can pass a config which
+	gives more fine-grain control over what instances you would like.
 ]=]
-function Binder.new<T>(tag: string, class: ClassInterface<T>): Binder<T>
+function Binder.new<T>(tag: string | BinderConfig, class: ClassInterface<T>): Binder<T>
+	if typeof(tag) == "string" then
+		tag = {
+			Tags = { tag },
+			Ancestors = { game },
+		}
+	end
+	local config = tag :: BinderConfig
+
 	local self: Binder<T> = setmetatable(BaseObject.new(), Binder)
 	self._Class = class
 	self._Tag = tag
 	self._ClassInstances = {}
+	self._Predicate = function(instance: Instance)
+		local hasTag = true
+		for _, v in config.Tags do
+			hasTag = instance:HasTag(v)
+			if not hasTag then
+				return false
+			end
+
+			local isDescendant = false
+			for _, v in config.Ancestors do
+				isDescendant = instance:IsDescendantOf(v)
+				if not isDescendant then
+					return false
+				end
+			end
+		end
+		return true
+	end
 
 	self._Sweeper:Add(function()
 		for _, v in self._ClassInstances do
