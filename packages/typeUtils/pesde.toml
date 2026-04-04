@@ -1,11 +1,11 @@
-name = "apple_pear_studio/sapling"
-version = "0.0.0"
-private = true
-
-workspace_members = [ "packages/*", "tools/*" ]
+name = "sapling/types_utils"
+version = "0.1.0"
+license = "MIT"
 
 [target]
 environment = "roblox"
+lib = "source/init.luau"
+build_files = ["source"]
 
 [indices]
 default = "https://github.com/pesde-pkg/index"
@@ -16,4 +16,7 @@ sourcemap_generator = ".pesde/scripts/sourcemap_generator.luau"
 
 [dev_dependencies]
 scripts = { name = "pesde/scripts_rojo", version = "^0.2.0", target = "lune" }
-rojo = { name = "pesde/rojo", version = "^7.5.1", target = "lune" }
+
+[engines]
+pesde = "^0.7.0"
+lune = "^0.10.2"
