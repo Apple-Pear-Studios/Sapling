@@ -98,7 +98,7 @@ local function onCharacterAdded(character: Model)
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart") :: HumanoidRootPart
     local humanoid = character:FindFirstChildWhichIsA("Humanoid") :: Humanoid
 
-    local heartbeatConn = RunService.Heartbeat:Connect(function(a0: number)
+    local heartbeatConn = RunService.Heartbeat:Connect(function()
         updateSoundSpeedAndVolume(humanoid, humanoidRootPart)
     end)
 

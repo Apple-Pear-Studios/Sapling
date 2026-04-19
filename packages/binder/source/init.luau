@@ -126,8 +126,8 @@ function Binder.new<T>(tag: string | BinderConfig, class: ClassInterface<T>): Bi
             end
 
             local isDescendant = false
-            for _, v in config.Ancestors do
-                isDescendant = instance:IsDescendantOf(v)
+            for _, loopAncestor in config.Ancestors do
+                isDescendant = instance:IsDescendantOf(loopAncestor)
                 if not isDescendant then
                     return false
                 end
@@ -138,8 +138,8 @@ function Binder.new<T>(tag: string | BinderConfig, class: ClassInterface<T>): Bi
             return true
         end
 
-        for _, class in config.Classes do
-            if instance:IsA(class) then
+        for _, loopClass in config.Classes do
+            if instance:IsA(loopClass) then
                 return true
             end
         end

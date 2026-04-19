@@ -21,10 +21,11 @@ export type BaseDispatcher = typeof(setmetatable(
 
 	Returns all function on services which have the passed `name`.
 ]=]
-function BaseDispatcher.collectFunctions(self: BaseDispatcher, name: string)
+function BaseDispatcher.collectFunctions(_self: BaseDispatcher, name: string)
     return ServiceManager.collectFunctions(name)
 end
 
+--selene: allow(unused_variable)
 --[=[
 	@method dispatch
 	@param name string
