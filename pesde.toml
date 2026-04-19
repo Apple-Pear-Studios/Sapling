@@ -17,3 +17,25 @@ sourcemap_generator = ".pesde/scripts/sourcemap_generator.luau"
 [dev_dependencies]
 scripts = { name = "pesde/scripts_rojo", version = "^0.2.0", target = "lune" }
 rojo = { name = "pesde/rojo", version = "^7.5.1", target = "lune" }
+=======
+name = "apple_pear_studio/sapling"
+version = "0.0.0"
+private = true
+
+workspace_members = [ "packages/*", "tools/*" ]
+
+[target]
+environment = "roblox"
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
+
+[scripts]
+roblox_sync_config_generator = ".pesde/scripts/roblox_sync_config_generator.luau"
+sourcemap_generator = ".pesde/scripts/sourcemap_generator.luau"
+
+[dev_dependencies]
+scripts = { name = "pesde/scripts_rojo", version = "^0.2.0", target = "lune" }
+rojo = { name = "pesde/rojo", version = "^7.5.1", target = "lune" }
+stylua = { name = "pesde/stylua", version = "^2.4.1", target = "lune" }
+selene = { name = "pesde/selene", version = "^0.30.1", target = "lune" }
