@@ -1,5 +1,5 @@
 <div align="center">
-    <h1>Sapling</h1>
+    <h1>🌱 Sapling</h1>
     <a href="https://github.com/Its-a-bit-random/Sapling/releases"> <img src=".moonwave/static/Community-GitHub-link-github-releases.svg"> </a>
     <a href="https://github.com/Its-a-bit-random/Sapling/tree/main/packages"> <img src=".moonwave/static/Community-Package-link-pesde.svg"> </a>
     <a href="https://github.com/Its-a-bit-random/Sapling/blob/main/changelog.md"> <img src=".moonwave/static/Roblox-Styled-Original-link-changelog.svg"> </a>
