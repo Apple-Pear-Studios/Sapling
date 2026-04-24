@@ -49,7 +49,7 @@ function Result.err<E>(value: E): Error<E>
     return {
         ok = false,
         error = value,
-    }
+    } :: Error<E>
 end
 
 --[=[
