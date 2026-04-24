@@ -3,7 +3,7 @@ version = "1.0.0"
 license = "MIT"
 repository = "https://github.com/Its-a-bit-random/Sapling"
 authors = [ "Sebastian S <gramps@itsabitrandom.com>" ]
-includes = ["pesde.toml", "README.md", "source/**" ]
+includes = ["pesde.toml", "README.md", "source/**", "docs/**" ]
 
 [target]
 environment = "roblox"
