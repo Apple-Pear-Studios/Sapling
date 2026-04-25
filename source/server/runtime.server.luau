@@ -1,5 +1,4 @@
 local BlockingDispatcher = require(script.Parent.BlockingDispatcher)
-local binder = require(script.Parent.Parent.Parent.ReplicatedStorage.packages.binder.binder)
 local queryBuilder = require(script.Parent.Parent.Parent.ReplicatedStorage.packages.queryBuilder)
 local sapling = require(script.Parent.Parent.Parent.ReplicatedStorage.packages.sapling)
 
@@ -25,10 +24,3 @@ end
 function RainbowEffect.Destroy(self)
     self.p.Color = Color3.fromRGB(255, 0, 0)
 end
-
-local coolBinder = binder.new("Rainbow", RainbowEffect)
-coolBinder:Start()
-
-task.wait(5)
-
-coolBinder:Destroy()

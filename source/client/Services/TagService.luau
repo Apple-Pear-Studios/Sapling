@@ -1,7 +1,7 @@
 local binder = require(script.Parent.Parent.Parent.Parent.ReplicatedStorage.packages.binder.binder)
 local TagService = { ServiceName = "TagService" }
 
-function TagService.onStart()
+function TagService.OnStart()
     binder.bind("Rainbow", function(instance: Instance)
         print("Added")
         assert(instance:IsA("BasePart"), "Cannot make a non BasePart rainbow")
