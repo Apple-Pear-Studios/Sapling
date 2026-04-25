@@ -19,7 +19,7 @@ jobs:
         uses: lumin-org/setup-pesde@v0.4.1
 
       - name: Install dependencies
-        run: pesde install
+        run: pesde install --locked
 
       - name: Run StyLua (format check)
         run: stylua --check packages/*/source/**
