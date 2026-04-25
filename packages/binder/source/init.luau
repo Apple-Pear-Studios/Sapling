@@ -1,220 +1,111 @@
 local CollectionService = game:GetService("CollectionService")
 
-local BaseObject = require(script.Parent.roblox_packages.BaseObject)
+local Sweeper = require(script.Parent.roblox_packages.Sweeper)
 
 --[=[
-	@interface ClassInterface<T>
-	.new (instance: Instance) -> T
-	.Destroy (T) -> ()
-	@within Binder
-
-	Basic requiremnts for a class to be able to be used by a Binder
+    Function which takes in an instance and returns another function
+    to cleanup
 ]=]
-type ClassInterface<T> = {
-    new: (instance: Instance) -> T,
-    Destroy: (T) -> (),
-}
+type BinderCallback = (instance: Instance) -> () -> ()
 
 --[=[
-	@interface BinderConfig
-	.Tags { string }
-	.Ancestors { Instance }
-	.Classes { string }
-	@within Binder
+    A simple package which allows you to bind a function to a tag. For example here is how you
+    can create a rainbow tag to make any part rainbow:
 
-	```lua
-	local config = {
-		Tags = { "Blue", "Red" }, -- Has tag "Blue" AND "Red"
-		Classes = { "BasePart", "Model" }, -- Is a BasePart OR Model
-		Ancestors = { Workspace, ReplicatedStorage } -- In Workspace OR ReplicatedStorage
-	}
-	```
-]=]
-type BinderConfig = {
-    Tags: { string },
-    Classes: { string },
-    Ancestors: { Instance },
-}
-
---[=[
-	@class Binder
-	A binder allows you to bind a Luau class to instances with certain tags. For example:
-
-	```lua
-	local MyClass = {}
-	MyClass.__index = MyClass
-
-	function MyClass.new(robloxInstance)
-		print("New tagged instance of ", robloxInstance)
-		return setmetatable({}, MyClass)
-	end
-
-	function MyClass:Destroy()
-		print("Cleaning up")
-		setmetatable(self, nil)
-	end
-
-	-- bind to every instance with tag of "Yellow"
-	local binder = Binder.new("Yellow", MyClass)
-	binder:Start() -- listens for new instances and connects events
-	```
-]=]
-local Binder = setmetatable({}, BaseObject)
-Binder.ClassName = "Binder"
-Binder.__index = Binder
-
-export type Binder<T> =
-    typeof(setmetatable(
-        {} :: {
-            _Class: ClassInterface<T>,
-            _Config: BinderConfig,
-            _ClassInstances: { [Instance]: ClassInterface<T> },
-            _Predicate: (instance: Instance) -> boolean,
-        },
-        Binder
-    ))
-    & BaseObject.BaseObject
-
---[=[
-	@prop _Tag string
-	@private
-	@within Binder
-
-	The [CollectionService] tag to bind to
-]=]
-
---[=[
-	@prop _Class ClassInterface<T>
-	@private
-	@within Binder
-
-	Class table which should contain the constructor & destructor of the class.
-]=]
-
---[=[
-	@prop _ClassInstances { [Instance]: ClassInterface<T> }
-	@private
-	@within Binder
-
-	A map of instances to their class instances.
-]=]
-
---[=[
-	Create a new binder You can either pass a single tag string, or you can pass a config which
-	gives more fine-grain control over what instances you would like.
-]=]
-function Binder.new<T>(tag: string | BinderConfig, class: ClassInterface<T>): Binder<T>
-    if typeof(tag) == "string" then
-        tag = {
-            Tags = { tag },
-            Ancestors = { game },
-            Classes = {},
-        }
-    end
-    local config = tag :: BinderConfig
-
-    local self: Binder<T> = setmetatable(BaseObject.new(), Binder)
-    self._Class = class
-    self._Config = tag
-    self._ClassInstances = {}
-    self._Predicate = function(instance: Instance)
-        local hasTag = true
-        for _, v in config.Tags do
-            hasTag = instance:HasTag(v)
-            if not hasTag then
-                return false
+    ```luau
+    binder.bind("Rainbow", function(instance: Instance)
+        assert(instance:IsA("BasePart"), "Cannot make a non BasePart rainbow")
+        local thread = task.spawn(function()
+            while task.wait(1) do
+                instance.BrickColor = BrickColor.random()
             end
+        end)
 
-            local isDescendant = false
-            for _, loopAncestor in config.Ancestors do
-                isDescendant = instance:IsDescendantOf(loopAncestor)
-                if not isDescendant then
-                    return false
-                end
-            end
+        -- Return a cleanup function
+        return function()
+            task.cancel(thread)
         end
+    end)
+    ```
+]=]
+local Binder = {}
 
-        if #config.Classes == 0 then
-            return true
-        end
+--[=[
+    @yields
 
-        for _, loopClass in config.Classes do
-            if instance:IsA(loopClass) then
-                return true
-            end
-        end
+    Little utility function to allow you to yield the current thread until the passed tag
+    has been removed from the given instance, we need this because roblox doesnt have a proper
+    way to *wait* nor detect if a tag is removed from a certain instance.
 
-        return false
+    @param tag the tag to check against
+    @param instance the instance to check on
+]=]
+function Binder.yieldUntilTagIsRemoved(tag: string, instance: Instance)
+    if not instance:HasTag(tag) then
+        return
     end
 
-    self._Sweeper:Add(function()
-        for _, v in self._ClassInstances do
-            v:Destroy()
+    local thread = coroutine.running()
+
+    -- NOTE:
+    -- Instead of polling we use events to save performance, however if many binders exist this could use a lot of
+    -- memory. In the future we could make it so that there is only 1 GetInstanceRemovedSignal for each tag. Polling is not
+    -- an option here becuase if there are a lot of binders it will cause performance issues.
+    local conn = CollectionService:GetInstanceRemovedSignal(tag):Connect(function(taggedInstance: Instance)
+        if taggedInstance == instance then
+            coroutine.resume(thread)
         end
-        table.clear(self._ClassInstances)
     end)
 
-    return self
+    coroutine.yield()
+
+    conn:Disconnect()
+
+    return
 end
 
 --[=[
-	@private
-	Check if `instance` has a class creted for it.
+    Binds the passed `callback` to the `instance` & `tag`. This is a small untility function to wrap around the
+    functionality of calling the cleanup function if the instance is destroyed or tag is removed.
+
+    @param tag the tag which should be bound
+    @param instance the instance which should be bound
+    @param callback function which handles the bound `instance` and `tag`
 ]=]
-function Binder._HasInstanceGotAClass<T>(self: Binder<T>, instance: Instance): boolean
-    return self._ClassInstances[instance] ~= nil
+local function bindCallbackToInstance(tag: string, instance: Instance, callback: BinderCallback)
+    local sweeper = Sweeper.new()
+
+    local cleanup = callback(instance)
+
+    sweeper:Add(cleanup)
+    sweeper:Add(instance.Destroying:Connect(cleanup))
+
+    do
+        local thread = task.spawn(function()
+            Binder.yieldUntilTagIsRemoved(tag, instance)
+            cleanup()
+        end)
+        sweeper:Add(function()
+            task.cancel(thread)
+        end)
+    end
 end
 
 --[=[
-	@private
-	Create a class for the `instance`, as well as checking if it fits the [BinderConfig] and it doesn
-	not yet have a class.
-]=]
-function Binder._Add<T>(self: Binder<T>, instance: Instance)
-    local hasClass = self:_HasInstanceGotAClass(instance)
-    local canAdd = self._Predicate(instance)
+    Bind the `fn` to the passed `tag`. Keep in mind that if an instance is deleted rather than the tag removed
+    the instance may be nil by the time the cleanup function is called.
 
-    if hasClass or not canAdd then
-        return
+    @param tag The tag to bind the `fn` to
+    @param fn Function which returns a cleanup function
+]=]
+function Binder.bind(tag: string, fn: BinderCallback)
+    for _, v in CollectionService:GetTagged(tag) do
+        bindCallbackToInstance(tag, v, fn)
     end
 
-    local class = self._Class.new(instance)
-    self._ClassInstances[instance] = class
-end
-
---[=[
-	@private
-	Destroys the `instance`'s class if it has one.
-]=]
-function Binder._Remove<T>(self: Binder<T>, instance: Instance)
-    local hasClass = self:_HasInstanceGotAClass(instance)
-
-    if not hasClass then
-        return
-    end
-
-    local class = self._ClassInstances[instance]
-    class:Destroy()
-    self._ClassInstances[instance] = nil
-end
-
---[=[
-	Connects the [CollectionService] events needed to listen to tags.
-]=]
-function Binder.Start<T>(self: Binder<T>)
-    for _, tag in self._Config.Tags do
-        for _, v in CollectionService:GetTagged(tag) do
-            self:_Add(v)
-        end
-
-        self._Sweeper:Add(CollectionService:GetInstanceAddedSignal(tag):Connect(function(instance: Instance)
-            self:_Add(instance)
-        end))
-
-        self._Sweeper:Add(CollectionService:GetInstanceRemovedSignal(tag):Connect(function(instance: Instance)
-            self:_Remove(instance)
-        end))
-    end
+    CollectionService:GetInstanceAddedSignal(tag):Connect(function(taggedInstance: Instance)
+        bindCallbackToInstance(tag, taggedInstance, fn)
+    end)
 end
 
 return Binder
